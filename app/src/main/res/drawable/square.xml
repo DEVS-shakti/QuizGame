@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Set the solid color of the button -->
+    <solid android:color="#E8FFD600" /> <!-- Replace with your desired color -->
+
+    <!-- Set the border of the button -->
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFF" /> <!-- Replace with your desired border color -->
+
+    <!-- Remove corner radius to make it a perfect square -->
+    <corners android:radius="0dp" />
+
+    <!-- Add padding inside the button (optional) -->
+    <padding
+        android:left="8dp"
+        android:right="8dp"
+        android:top="8dp"
+        android:bottom="8dp" />
+</shape>
