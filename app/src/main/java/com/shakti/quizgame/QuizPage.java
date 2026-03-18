@@ -2,8 +2,6 @@ package com.shakti.quizgame;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -16,14 +14,14 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -43,7 +41,7 @@ public class QuizPage extends AppCompatActivity {
     ProgressBar progressBar;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
 
-    DatabaseReference users = firebaseDatabase.getReference().child("users").child(FirebaseAuth.getInstance().getUid());
+    DatabaseReference users;
     String question;
     String answer;
     int possition;
@@ -53,14 +51,20 @@ public class QuizPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        possition = getIntent().getIntExtra("test", 1);
-        loadQuestion(possition);
         setContentView(R.layout.activity_quiz_page);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        possition = getIntent().getIntExtra("test", 1);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            startActivity(new Intent(QuizPage.this, SignIn.class));
+            finish();
+            return;
+        }
+        users = firebaseDatabase.getReference().child("users").child(currentUser.getUid());
         LinearLayout ly = findViewById(R.id.ly);
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -71,7 +75,9 @@ public class QuizPage extends AppCompatActivity {
         findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                c.cancel();
+                if (c != null) {
+                    c.cancel();
+                }
                 startActivity(new Intent(QuizPage.this, TestActivity.class));
                 finish();
             }
@@ -84,11 +90,14 @@ public class QuizPage extends AppCompatActivity {
         oC = findViewById(R.id.oC);
         oD = findViewById(R.id.oD);
         quiz = findViewById(R.id.quiz);
+        loadQuestion(possition);
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 quizCurrent++;
-                c.cancel();
+                if (c != null) {
+                    c.cancel();
+                }
                 reset();
                 loadQuestion(possition);
             }
@@ -100,31 +109,30 @@ public class QuizPage extends AppCompatActivity {
 
     private void loadQuestion(int index) {
         DatabaseReference reference = firebaseDatabase.getReference().child("QuestionsParent").child("Questions" + String.valueOf(index + 1));
-        reference.addValueEventListener(new ValueEventListener() {
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 quizCount = (int) dataSnapshot.getChildrenCount();
-                if (quizCount <= quizCurrent) {
-                    Toast.makeText(QuizPage.this, "Question khatam hogya", Toast.LENGTH_SHORT).show();
+                if (quizCurrent > quizCount) {
                     Intent intent = new Intent(QuizPage.this, Result.class);
                     intent.putExtra("score", score);
                     startActivity(intent);
                     finish();
                     return;
                 }
-                question = dataSnapshot.child(String.valueOf(quizCurrent)).child("question").getValue().toString();
-                A = dataSnapshot.child(String.valueOf(quizCurrent)).child("optionA").getValue().toString();
-                B = dataSnapshot.child(String.valueOf(quizCurrent)).child("optionB").getValue().toString();
-                C = dataSnapshot.child(String.valueOf(quizCurrent)).child("optionC").getValue().toString();
-                D = dataSnapshot.child(String.valueOf(quizCurrent)).child("optionD").getValue().toString();
-                String optionAns = dataSnapshot.child(String.valueOf(quizCurrent)).child("answer").getValue().toString();
-                answer = dataSnapshot.child(String.valueOf(quizCurrent)).child("option" + optionAns).getValue().toString();
+                question = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("question").getValue());
+                A = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("optionA").getValue());
+                B = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("optionB").getValue());
+                C = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("optionC").getValue());
+                D = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("optionD").getValue());
+                String optionAns = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("answer").getValue());
+                answer = valueOrEmpty(dataSnapshot.child(String.valueOf(quizCurrent)).child("option" + optionAns).getValue());
                 quiz.setText("Q." + question);
                 oA.setText("A." + A);
                 oB.setText("B." + B);
                 oC.setText("C." + C);
                 oD.setText("D." + D);
-                no.setText(String.valueOf(quizCurrent) + "/10");
+                no.setText(String.valueOf(quizCurrent) + "/" + String.valueOf(quizCount));
                 setProgressBar(progressBar);
                 checkListener(oA, "A.");
                 checkListener(oB, "B.");
@@ -141,6 +149,7 @@ public class QuizPage extends AppCompatActivity {
     }
 
     private void setProgressBar(ProgressBar progressBar) {
+        progressBar.setProgress(0);
         c = new CountDownTimer(60 * 1000, 1000) {
 
             @Override
@@ -165,6 +174,7 @@ public class QuizPage extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         quizCurrent++;
+                        reset();
                         loadQuestion(possition);
                         dialog.dismiss();
                     }
@@ -182,13 +192,12 @@ public class QuizPage extends AppCompatActivity {
             public void onClick(View v) {
                 String txt = o.getText().toString();
                 if (txt.equals(op + answer)) {
-                    o.setBackgroundColor(Color.GREEN);
+                    setOptionState(o, true);
                     score++;
                     users.child("score").setValue(score);
-                    Toast.makeText(QuizPage.this, "score" + String.valueOf(score), Toast.LENGTH_SHORT).show();
                     o.setClickable(false);
                 } else {
-                    o.setBackgroundColor(Color.RED);
+                    setOptionState(o, false);
                     correctFlag(oA, "A.");
                     correctFlag(oB, "B.");
                     correctFlag(oC, "C.");
@@ -206,21 +215,39 @@ public class QuizPage extends AppCompatActivity {
             private void correctFlag(TextView o, String op) {
                 String txt = o.getText().toString();
                 if (txt.equals(op + answer)) {
-                    o.setBackgroundColor(Color.GREEN);
+                    setOptionState(o, true);
                 }
             }
         });
     }
 
     private void reset() {
-        oA.setBackgroundColor(Color.WHITE);
-        oB.setBackgroundColor(Color.WHITE);
-        oC.setBackgroundColor(Color.WHITE);
-        oD.setBackgroundColor(Color.WHITE);
+        resetOption(oA);
+        resetOption(oB);
+        resetOption(oC);
+        resetOption(oD);
         oA.setClickable(true);
         oB.setClickable(true);
         oC.setClickable(true);
         oD.setClickable(true);
+    }
+
+    private void setOptionState(TextView option, boolean isCorrect) {
+        if (isCorrect) {
+            option.setBackgroundResource(R.drawable.bg_option_correct);
+        } else {
+            option.setBackgroundResource(R.drawable.bg_option_wrong);
+        }
+        option.setTextColor(ContextCompat.getColor(this, R.color.white));
+    }
+
+    private void resetOption(TextView option) {
+        option.setBackgroundResource(R.drawable.bg_option);
+        option.setTextColor(ContextCompat.getColor(this, R.color.brand_on_surface));
+    }
+
+    private String valueOrEmpty(Object value) {
+        return value == null ? "" : value.toString();
     }
 
 }

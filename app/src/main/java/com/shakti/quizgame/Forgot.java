@@ -2,7 +2,6 @@ package com.shakti.quizgame;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +19,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class Forgot extends AppCompatActivity {
     EditText email;
@@ -53,36 +51,27 @@ public class Forgot extends AppCompatActivity {
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String UserEmail=email.getText().toString();
+                String UserEmail=email.getText().toString().trim();
                 if(UserEmail.isEmpty())
                 {
                     Toast.makeText(Forgot.this, "Enter email to get reset link", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                progressBar.setVisibility(View.VISIBLE);
+                reset.setEnabled(false);
                 auth.sendPasswordResetEmail(UserEmail)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                progressBar.setVisibility(View.VISIBLE);
-                                reset.setText("");
-                                new Handler().postDelayed(new Runnable(){
-                                    @Override
-                                    public void run() {
-                                        progressBar.setVisibility(View.GONE);
-                                        reset.setText("Get Email");
-                                    }
-                                }, 1000);
-                                if(task.isSuccessful())
-                                {
-                                    FirebaseUser user=auth.getCurrentUser();
-                                    if (user != null) {
-                                        Toast.makeText(Forgot.this,"Reset email sent",Toast.LENGTH_SHORT).show();
-
-                                    }else{
-                                        Toast.makeText(Forgot.this, "Email not exist", Toast.LENGTH_SHORT).show();
-                                        Toast.makeText(Forgot.this, "Create an account", Toast.LENGTH_SHORT).show();
-
-                                    }
+                                progressBar.setVisibility(View.GONE);
+                                reset.setEnabled(true);
+                                if(task.isSuccessful()) {
+                                    Toast.makeText(Forgot.this,"Reset email sent",Toast.LENGTH_SHORT).show();
+                                } else {
+                                    String message = task.getException() != null
+                                            ? task.getException().getMessage()
+                                            : "Unable to send reset email";
+                                    Toast.makeText(Forgot.this, message, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

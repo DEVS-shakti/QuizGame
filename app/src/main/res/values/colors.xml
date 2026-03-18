@@ -2,4 +2,15 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="brand_primary">#FFD600</color>
+    <color name="brand_primary_dark">#F4C400</color>
+    <color name="brand_secondary">#FFAB00</color>
+    <color name="brand_surface">#FFFDF5</color>
+    <color name="brand_background">#FFFFFF</color>
+    <color name="brand_on_primary">#1A1A1A</color>
+    <color name="brand_on_surface">#1A1A1A</color>
+    <color name="brand_outline">#E6D894</color>
+    <color name="success">#2E7D32</color>
+    <color name="error">#D32F2F</color>
+    <color name="warning">#F9A825</color>
 </resources>

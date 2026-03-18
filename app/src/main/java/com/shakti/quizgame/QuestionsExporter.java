@@ -37,8 +37,9 @@ public class QuestionsExporter extends AppCompatActivity {
             }
         });
 
+        int testIndex = getIntent().getIntExtra("testIndex", 11);
         // Initialize Firebase Database reference
-        questionsRef = FirebaseDatabase.getInstance().getReference("QuestionsParent").child("Questions11");
+        questionsRef = FirebaseDatabase.getInstance().getReference("QuestionsParent").child("Questions" + testIndex);
 
         // Link UI elements
         initializeUI();
@@ -73,12 +74,12 @@ public class QuestionsExporter extends AppCompatActivity {
     }
 
     private int calculateNextId(DataSnapshot snapshot) {
-        int nextId = 6; // Default starting ID
+        int nextId = 1;
         if (snapshot.exists()) {
             for (DataSnapshot child : snapshot.getChildren()) {
                 try {
-                    // Retrieve the last ID and increment it
-                    nextId = Integer.parseInt(child.child("id").getValue().toString());
+                    int lastId = Integer.parseInt(child.child("id").getValue().toString());
+                    nextId = lastId + 1;
                 } catch (Exception e) {
                     Toast.makeText(this, "Invalid ID format in Firebase", Toast.LENGTH_SHORT).show();
                 }
@@ -97,6 +98,10 @@ public class QuestionsExporter extends AppCompatActivity {
 
         if (!areFieldsValid(question, optionA, optionB, optionC, optionD)) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!ans.matches("[A-Da-d]")) {
+            Toast.makeText(this, "Answer must be A, B, C, or D", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -121,7 +126,7 @@ public class QuestionsExporter extends AppCompatActivity {
 
     private HashMap<String, Object> createQuestionData(int id, String question, String optionA, String optionB, String optionC, String optionD,String ans) {
         HashMap<String, Object> questionData = new HashMap<>();
-        questionData.put("id", id+1);
+        questionData.put("id", id);
         questionData.put("question", question);
         questionData.put("optionA", optionA);
         questionData.put("optionB", optionB);

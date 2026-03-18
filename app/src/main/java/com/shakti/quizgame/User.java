@@ -3,7 +3,6 @@ package com.shakti.quizgame;
 public class User {
 
     String email;
-    String password;
     int score;
     boolean updated;
     String Name;
@@ -20,10 +19,9 @@ public class User {
 
     }
 
-    User(String name,String email,String password,int score,boolean updated)
+    User(String name,String email,int score,boolean updated)
     {
         this.email=email;
-        this.password=password;
         this.score=score;
         this.Name = name;
         this.updated=updated;
@@ -40,16 +38,8 @@ public class User {
         this.email = email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public int getScore() {

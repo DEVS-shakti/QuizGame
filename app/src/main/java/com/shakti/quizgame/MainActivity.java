@@ -13,6 +13,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class MainActivity extends AppCompatActivity {
     Animation animation;
     TextView tv;
@@ -32,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
-                Intent mainIntent = new Intent(MainActivity.this,SignIn.class);
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                Intent mainIntent = user == null
+                        ? new Intent(MainActivity.this, SignIn.class)
+                        : new Intent(MainActivity.this, MainMenu.class);
                 MainActivity.this.startActivity(mainIntent);
                 MainActivity.this.finish();
             }

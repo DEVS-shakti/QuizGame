@@ -5,67 +5,51 @@
     android:layout_height="match_parent"
     android:id="@+id/main"
     android:orientation="vertical"
-    android:background="@drawable/custom2"
-    android:padding="5dp">
+    android:background="@drawable/bg_screen"
+    android:padding="@dimen/space_l">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <TextView
+        <ImageView
             android:id="@+id/back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:background="@drawable/back"
-            android:fontFamily="@font/lobster"
-            android:gravity="center"
-            android:padding="16dp"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Back"
+            android:src="@drawable/back" />
 
         <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_m"
+            android:layout_weight="1"
+            android:text="Quiz Sets"
+            android:textAppearance="@style/TextAppearance.QuizGame.Subtitle" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add"
+            style="@style/Widget.QuizGame.Button.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="@font/lobster"
-            android:gravity="center"
-            android:padding="16dp"
-            android:text="QuizPages"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:layout_marginRight="80dp"
-            android:textStyle="bold" />
-        <TextView
-            android:layout_width="50dp"
-            android:id="@+id/add"
-            android:layout_height="50dp"
-            android:background="@drawable/border"
-            android:text="+"
-            android:layout_margin="10dp"
-            android:textAlignment="center"
-            android:textSize="35sp"
-            android:textColor="@color/black"
-            />
-
+            android:text="Add" />
     </LinearLayout>
-    <ScrollView
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border"
-        android:layout_margin="15dp"
-        >
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/space_m"
+        android:layout_weight="1">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="15dp"
-            android:background="@drawable/border"
-            android:padding="5dp"
+            android:padding="@dimen/space_m"
             tools:listitem="@layout/item_test" />
-
-    </ScrollView>
-
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

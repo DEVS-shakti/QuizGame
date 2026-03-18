@@ -6,31 +6,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 public class Result extends AppCompatActivity {
 
     ProgressBar progressBar;
-    TextView wish,ca,wa,back,Score;
+    TextView wish,ca,wa,Score;
+    View back;
     Button backbtn,rank;
-
-    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-
-    DatabaseReference users=firebaseDatabase.getReference().child("users").child(FirebaseAuth.getInstance().getUid());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,12 +77,24 @@ public class Result extends AppCompatActivity {
 
     private void setProgress() {
         int score=getIntent().getIntExtra("score",0);
+        if (score < 0) {
+            score = 0;
+        } else if (score > 10) {
+            score = 10;
+        }
         String CA=String.valueOf(score);
         String WA=String.valueOf(10-score);
         Score.setText(CA+"/10");
         progressBar.setProgress(score);
-        ca.setText("CorrectAnswer:"+CA);
-        wa.setText("WrongAnswer:"+WA);
+        ca.setText("Correct: " + CA);
+        wa.setText("Wrong: " + WA);
+        if (score >= 8) {
+            wish.setText("Excellent work");
+        } else if (score >= 5) {
+            wish.setText("Good effort");
+        } else {
+            wish.setText("Keep practicing");
+        }
     }
 
 

@@ -2,7 +2,6 @@ package com.shakti.quizgame;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,11 +57,15 @@ public class SignUp extends AppCompatActivity {
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email=Email.getText().toString();
-                String password=Password.getText().toString();
-                if(email.isEmpty()&&password.isEmpty())
+                String email=Email.getText().toString().trim();
+                String password=Password.getText().toString().trim();
+                if(email.isEmpty() || password.isEmpty())
                 {
                     Toast.makeText(SignUp.this, "Enter email and password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (password.length() < 6) {
+                    Toast.makeText(SignUp.this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -72,25 +75,20 @@ public class SignUp extends AppCompatActivity {
             }
 
             private void signUpwithFirebase(String email, String password) {
+             progressBar.setVisibility(View.VISIBLE);
+             signUp.setEnabled(false);
              auth.createUserWithEmailAndPassword(email,password)
                      .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                          @Override
                          public void onComplete(@NonNull Task<AuthResult> task) {
-                             progressBar.setVisibility(View.VISIBLE);
-                             signUp.setText("");
-                             new Handler().postDelayed(new Runnable(){
-                                 @Override
-                                 public void run() {
-                                     progressBar.setVisibility(View.GONE);
-                                     signUp.setText("Sign Up");
-                                 }
-                             }, 1000);
+                             progressBar.setVisibility(View.GONE);
+                             signUp.setEnabled(true);
 
                              if (task.isSuccessful()) {
                                  FirebaseUser user = auth.getCurrentUser();
                                  if (user != null) {
                                      DatabaseReference database = FirebaseDatabase.getInstance().getReference("users");
-                                     database.child(user.getUid()).setValue(new User(getName(email),email,password,0,false));
+                                     database.child(user.getUid()).setValue(new User(getName(email),email,0,false));
                                      Toast.makeText(SignUp.this, "User Data saved", Toast.LENGTH_SHORT).show();
                                      Toast.makeText(SignUp.this, "Sign Up Successful!", Toast.LENGTH_LONG).show();
                                      Intent intent=new Intent(SignUp.this, MainMenu.class);
@@ -98,7 +96,10 @@ public class SignUp extends AppCompatActivity {
                                      finish();
                                  }
                              } else {
-                                 Toast.makeText(SignUp.this, "Authentication failed.", Toast.LENGTH_LONG).show();
+                                 String message = task.getException() != null
+                                         ? task.getException().getMessage()
+                                         : "Authentication failed.";
+                                 Toast.makeText(SignUp.this, message, Toast.LENGTH_LONG).show();
                              }
                          }
                      });

@@ -1,19 +1,11 @@
 package com.shakti.quizgame;
 
-import androidx.annotation.NonNull;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 public class Test {
     private String testName;
     private Class<?> intentClass;
     private String status;
     public Test(String testName, Class<?> intentClass) {
-        this.status=status;
+        this.status = "unlocked";
         this.testName = testName;
         this.intentClass = intentClass;
     }

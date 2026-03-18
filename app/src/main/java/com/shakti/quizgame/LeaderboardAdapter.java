@@ -1,5 +1,4 @@
 package com.shakti.quizgame;
-import android.hardware.usb.UsbRequest;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = userList.get(position);
-        holder.textViewName.setText(user.getName());
+        String name = user.getName();
+        holder.textViewName.setText(name == null || name.isEmpty() ? "Player" : name);
         holder.textViewRank.setText(String.valueOf(position + 1)+". ");
         holder.textViewScore.setText(String.valueOf(user.getScore()));
         holder.img.setImageResource(R.drawable.coder);

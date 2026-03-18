@@ -1,7 +1,6 @@
 package com.shakti.quizgame;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.SearchView;
@@ -91,15 +90,18 @@ public class LeaderBoard extends AppCompatActivity {
         });
     }
     private void filterList(String text) {
+        if (adapter == null) {
+            return;
+        }
         List<User> newList=new ArrayList<>();
         for(User user:userList)
         {
-            if(user.getName().toLowerCase().contains(text.toLowerCase()))
+            String name = user.getName();
+            if(name != null && name.toLowerCase().contains(text.toLowerCase()))
             {
                 newList.add(user);
             }
         }
         adapter.update(newList);
-        adapter.notifyDataSetChanged();
     }
 }

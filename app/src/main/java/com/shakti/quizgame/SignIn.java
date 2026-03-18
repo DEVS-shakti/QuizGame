@@ -1,14 +1,10 @@
 package com.shakti.quizgame;
 
-import static android.app.ProgressDialog.show;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +27,6 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,7 +41,7 @@ public class SignIn extends AppCompatActivity {
     Button signIn;
     TextView signUp,forgot;
     FirebaseAuth auth=FirebaseAuth.getInstance();
-    ActivityResultLauncher activityResultLauncher;
+    ActivityResultLauncher<Intent> activityResultLauncher;
 
     ProgressBar progressBar;
     SignInButton signInButton;
@@ -95,9 +90,9 @@ public class SignIn extends AppCompatActivity {
         signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email=Email.getText().toString();
-                String password=Password.getText().toString();
-                if(email.isEmpty()&&password.isEmpty())
+                String email=Email.getText().toString().trim();
+                String password=Password.getText().toString().trim();
+                if(email.isEmpty() || password.isEmpty())
                 {
                     Toast.makeText(SignIn.this, "Enter email and password", Toast.LENGTH_SHORT).show();
                     return;
@@ -108,31 +103,29 @@ public class SignIn extends AppCompatActivity {
             }
 
             private void signInwithFirebase(String email, String password) {
+                progressBar.setVisibility(View.VISIBLE);
+                signIn.setEnabled(false);
                 auth.signInWithEmailAndPassword(email,password)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.VISIBLE);
-                                signIn.setText("");
-                                new Handler().postDelayed(new Runnable(){
-                                    @Override
-                                    public void run() {
-                                        progressBar.setVisibility(View.GONE);
-                                        signIn.setText("Sign In");
-                                    }
-                                }, 1000);
+                                progressBar.setVisibility(View.GONE);
+                                signIn.setEnabled(true);
                                 if (task.isSuccessful()) {
                                     FirebaseUser user = auth.getCurrentUser();
                                     if (user != null) {
 
-                                        Toast.makeText(SignIn.this, "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(SignIn.this, "Sign in successful!", Toast.LENGTH_LONG).show();
                                         Intent intent=new Intent(SignIn.this,MainMenu.class);
                                         startActivity(intent);
                                         finish();
 
                                     }
                                 } else {
-                                    Toast.makeText(SignIn.this, "Authentication failed.", Toast.LENGTH_LONG).show();
+                                    String message = task.getException() != null
+                                            ? task.getException().getMessage()
+                                            : "Authentication failed.";
+                                    Toast.makeText(SignIn.this, message, Toast.LENGTH_LONG).show();
                                 }
                             }
                         });
@@ -142,7 +135,7 @@ public class SignIn extends AppCompatActivity {
     }
     private void signInWithGoogle() {
         GoogleSignInOptions gso=new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("AIzaSyACqVKBgWFxAWglG7PTxJQEpolRWnRjrCw")
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -188,14 +181,9 @@ public class SignIn extends AppCompatActivity {
             private void firebaseAuthWithGoogle(Task<GoogleSignInAccount> task)  {
                 try {
                 GoogleSignInAccount account =task.getResult(ApiException.class);
-                Toast.makeText(SignIn.this, "Succesfully", Toast.LENGTH_SHORT).show();
-                Intent intent=new Intent(SignIn.this,MainActivity.class);
-                startActivity(intent);
-                finish();
                 firebaseSignInWithGoogle(account);
                 } catch (ApiException e) {
-                    Toast.makeText(SignIn.this, "Error" + e, Toast.LENGTH_SHORT).show();
-                    throw new RuntimeException(e);
+                    Toast.makeText(SignIn.this, "Google sign-in failed", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -210,7 +198,7 @@ public class SignIn extends AppCompatActivity {
                         FirebaseUser user = auth.getCurrentUser();
                         if(user!=null)
                         {
-                            Toast.makeText(this, "GoogleSignIn succefully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Google sign-in successful", Toast.LENGTH_SHORT).show();
                             Intent intent=new Intent(SignIn.this,MainMenu.class);
                             startActivity(intent);
                             finish();
