@@ -5,7 +5,7 @@ Modern Android quiz app with Firebase auth, timed gameplay, and a global leaderb
 | Category | Details |
 | --- | --- |
 | Platform | Android |
-| Language | Kotlin |
+| Language | Java |
 | Auth | Firebase (Email/Password, Google Sign-In) |
 | Core Features | Timed quiz, score tracking, leaderboard |
 
@@ -17,7 +17,7 @@ Modern Android quiz app with Firebase auth, timed gameplay, and a global leaderb
 
 ## Tech Stack
 - Android SDK
-- Kotlin
+- Java
 - Firebase Authentication
 - Firebase Realtime Database or Firestore (depending on config)
 
